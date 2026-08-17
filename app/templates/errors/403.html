@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}403 - MusicOnline{% endblock %}
+{% block content %}
+<section class="container section">
+    <div class="empty-panel glass-panel">
+        <p class="eyebrow">403</p>
+        <h1>Access is restricted.</h1>
+        <p>This page is limited to accounts with the required access level.</p>
+        <a class="btn btn-primary" href="{{ url_for('public.home') }}">Return Home</a>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% set status_labels = {"approved": "Visible", "pending": "Pending Review", "rejected": "Rejected"} %}
+{% set can_order = current_user.is_authenticated and not current_user.is_admin and current_user.id != product.seller_id and product.stock > 0 and product.is_public %}
+{% block title %}{{ product.title }} - musicOnline{% endblock %}
+{% block content %}
+<section class="detail-layout container">
+    <div class="detail-visual glass-panel">
+        <div class="cover-art detail-cover" data-tone="{{ product.id % 6 }}">
+            {% if product.image_url %}
+                <img src="{{ product.image_url }}" alt="{{ product.title }}">
+            {% else %}
+                <div class="cover-art__placeholder">
+                    <span class="cover-art__disc"></span>
+                    <span class="cover-art__label">{{ product.format_label }}</span>
+                </div>
+            {% endif %}
+        </div>
+        <div class="player-panel glass-panel detail-player">
+            <div class="player-panel__top">
+                <div>
+                    <p class="eyebrow">Listing Snapshot</p>
+                    <h3>{{ product.title }}</h3>
+                    <p>{{ product.artist }}</p>
+                </div>
+                <span class="ghost-chip">{{ product.format_label }}</span>
+            </div>
+            <div class="detail-player-note">
+                <p>Review the record title, artist, release date, price, listing owner, availability, and listing status before ordering.</p>
+                <div class="showcase-pills">
+                    <span class="ghost-chip">{{ product.category.name }}</span>
+                    <span class="ghost-chip">{{ status_labels.get(product.approval_status, product.approval_status|title) }}</span>
+                    <span class="ghost-chip">{{ product.stock }} copies listed</span>
+                </div>
+                <a class="btn btn-secondary" href="{{ url_for('public.catalog', q=product.artist) }}">Search same artist</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="detail-copy">
+        <p class="eyebrow">{{ product.category.name }}</p>
+        <h1>{{ product.title }}</h1>
+        <p class="detail-subtitle">{{ product.artist }} - {{ product.format_label }} - Released {{ product.release_date.strftime('%Y-%m-%d') if product.release_date else 'TBC' }}</p>
+        <p class="detail-description">{{ product.description }}</p>
+
+        <div class="spec-grid">
+            <div class="spec-card glass-panel">
+                <small>Listed Price</small>
+                <strong>RMB {{ product.price|money }}</strong>
+            </div>
+            <div class="spec-card glass-panel">
+                <small>Status</small>
+                <strong>{{ status_labels.get(product.approval_status, product.approval_status|title) }}</strong>
+            </div>
+            <div class="spec-card glass-panel">
+                <small>Listed By</small>
+                <strong>{{ product.seller.display_name }}</strong>
+            </div>
+            <div class="spec-card glass-panel">
+                <small>Copies Available</small>
+                <strong>{{ product.stock }}</strong>
+            </div>
+        </div>
+
+        <div class="buy-panel glass-panel">
+            <div>
+                <p class="eyebrow">Bag And Order</p>
+                <h2>Review the listing, then add it to your bag or create an order right away.</h2>
+            </div>
+            <p class="purchase-note">Add this record to your bag or submit an order request now. Available stock is updated when an order is created.</p>
+
+            {% if can_order %}
+                <form class="order-form" method="post" action="{{ url_for('commerce.add_to_bag', product_id=product.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="quantity-shell">
+                        <div>
+                            <label for="quantity">Quantity</label>
+                            <p class="quantity-meta">{{ product.stock }} copies currently available.</p>
+                        </div>
+                        <input class="input quantity-input" id="quantity" name="quantity" type="number" min="1" max="{{ product.stock }}" value="1">
+                    </div>
+                    <div class="hero-actions">
+                        <button class="btn btn-primary" type="submit">Add to Bag</button>
+                        <button
+                            class="btn btn-secondary"
+                            type="submit"
+                            formaction="{{ url_for('commerce.buy_now', product_id=product.id) }}"
+                        >
+                            Buy Now
+                        </button>
+                    </div>
+                </form>
+            {% else %}
+                <div class="hero-actions">
+                    <a class="btn btn-primary" href="{{ url_for('public.catalog') }}">Back to search</a>
+                    {% if current_user.is_authenticated and not current_user.is_admin and current_user.id == product.seller_id %}
+                        <a class="btn btn-secondary" href="{{ url_for('dashboard.product_edit', product_id=product.id) }}">Edit this listing</a>
+                    {% elif not current_user.is_authenticated %}
+                        <a class="btn btn-secondary" href="{{ url_for('auth.login', next=request.path) }}">Sign in to order</a>
+                    {% elif product.stock <= 0 %}
+                        <span class="ghost-chip">Sold out for now</span>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<section class="container section">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Similar Listings</p>
+            <h2>More vinyl entries from the same category.</h2>
+        </div>
+    </div>
+    <div class="product-grid">
+        {% for product in related_products %}
+            {% include "partials/product_card.html" %}
+        {% else %}
+            <div class="empty-panel glass-panel">
+                <h3>No similar listings available.</h3>
+                <p>More items will appear here when matching entries exist in the same category.</p>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

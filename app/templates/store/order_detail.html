@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Order {{ order.order_number }} - musicOnline{% endblock %}
+{% block content %}
+<section class="bag-hero container">
+    <div>
+        <p class="eyebrow">Order Detail</p>
+        <h1>Order {{ order.order_number }}</h1>
+        <p>Created {{ order.created_at.strftime('%Y-%m-%d %H:%M') }} - Status {{ order.status_label }}</p>
+    </div>
+    <div class="bag-hero__actions">
+        {% if current_user.is_admin %}
+            <a class="btn btn-secondary" href="{{ url_for('commerce.admin_orders') }}">Manage Orders</a>
+        {% else %}
+            <a class="btn btn-secondary" href="{{ url_for('commerce.orders') }}">Back to Orders</a>
+            <a class="btn btn-secondary" href="{{ url_for('commerce.bag') }}">Open Bag</a>
+        {% endif %}
+    </div>
+</section>
+
+<section class="container section bag-layout">
+    <div class="bag-list">
+        {% for item in order.items %}
+            <article class="bag-item glass-panel">
+                <a class="cover-art cover-art--mini" data-tone="{{ item.product.id % 6 }}" href="{{ url_for('public.product_detail', product_id=item.product.id) }}">
+                    {% if item.product.image_url %}
+                        <img src="{{ item.product.image_url }}" alt="{{ item.product.title }}">
+                    {% else %}
+                        <div class="cover-art__placeholder">
+                            <span class="cover-art__disc cover-art__disc--mini"></span>
+                        </div>
+                    {% endif %}
+                </a>
+                <div class="bag-item__copy">
+                    <p class="eyebrow">{{ item.product.category.name }}</p>
+                    <h3>{{ item.product.title }}</h3>
+                    <p>{{ item.product.artist }} - {{ item.product.format_label }}</p>
+                    <span class="ghost-chip">Listed by {{ item.seller.display_name }}</span>
+                </div>
+                <div class="bag-item__controls bag-item__controls--detail">
+                    <div class="bag-item__price">
+                        <strong>RMB {{ item.line_total|money }}</strong>
+                        <small>{{ item.quantity }} x RMB {{ item.unit_price|money }}</small>
+                    </div>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+
+    <aside class="bag-summary glass-panel">
+        <p class="eyebrow">Order Summary</p>
+        <h2>{{ order.total_quantity }} item{{ "" if order.total_quantity == 1 else "s" }}</h2>
+        <div class="summary-rows">
+            <div class="summary-row">
+                <span>Status</span>
+                <strong>{{ order.status_label }}</strong>
+            </div>
+            <div class="summary-row">
+                <span>Buyer</span>
+                <strong>{{ order.buyer.display_name }}</strong>
+            </div>
+            <div class="summary-row">
+                <span>Order total</span>
+                <strong>RMB {{ order.total_amount|money }}</strong>
+            </div>
+        </div>
+        <p class="bag-summary__note">Use this summary to review item quantities, listing owner details, status, and order total.</p>
+    </aside>
+</section>
+{% endblock %}

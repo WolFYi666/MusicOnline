@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Moderation - musicOnline{% endblock %}
+{% block content %}
+<section class="container section">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Moderation</p>
+            <h1>Review user-submitted vinyl listings</h1>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        {% for product in products %}
+            <article class="dashboard-card glass-panel">
+                <div class="dashboard-card__top">
+                    <div>
+                        <strong>{{ product.title }}</strong>
+                        <p>{{ product.artist }} - {{ product.seller.display_name }}</p>
+                    </div>
+                    <span class="status-pill {{ product.approval_status }}">{{ product.approval_status }}</span>
+                </div>
+                <div class="dashboard-card__meta">
+                    <span>{{ product.category.name }}</span>
+                    <span>{{ product.format_label }}</span>
+                    <span>RMB {{ product.price|money }}</span>
+                    <span>{{ product.stock }} copies</span>
+                </div>
+                <form action="{{ url_for('dashboard.admin_product_review', product_id=product.id) }}" method="post" class="form-grid compact">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="field">
+                        <div>
+                            <label>Approval</label>
+                            <select class="input" name="approval_status">
+                                {% for status in ['pending', 'approved', 'rejected'] %}
+                                    <option value="{{ status }}" {% if product.approval_status == status %}selected{% endif %}>{{ status|title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <button class="ghost-chip ghost-chip--primary" type="submit">Save changes</button>
+                </form>
+            </article>
+        {% else %}
+            <div class="empty-panel glass-panel">
+                <h3>No submitted listings are waiting.</h3>
+                <p>New or updated records will appear here when registered users submit them for review.</p>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

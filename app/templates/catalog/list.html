@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Search Vinyl - musicOnline{% endblock %}
+{% block content %}
+<section class="catalog-hero container">
+    <div>
+        <p class="eyebrow">Search Vinyl</p>
+        <h1>Search vinyl listings by artist, album, single, or EP title.</h1>
+        <p>Use keyword, category, format, and sorting controls to browse available records quickly on desktop and mobile.</p>
+    </div>
+    <form class="search-panel glass-panel" method="get">
+        <div class="field grow">
+            <label for="q">Keyword</label>
+            <input class="input" id="q" name="q" value="{{ filters.q }}" placeholder="artist, album, single, ep">
+        </div>
+        <div class="field">
+            <label for="category">Category</label>
+            <select class="input" id="category" name="category">
+                <option value="">All categories</option>
+                {% for category in categories %}
+                    <option value="{{ category.slug }}" {% if filters.category == category.slug %}selected{% endif %}>{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="field">
+            <label for="format">Format</label>
+            <select class="input" id="format" name="format">
+                <option value="all" {% if filters.format == 'all' %}selected{% endif %}>All formats</option>
+                <option value="album" {% if filters.format == 'album' %}selected{% endif %}>Album</option>
+                <option value="single" {% if filters.format == 'single' %}selected{% endif %}>Single</option>
+                <option value="ep" {% if filters.format == 'ep' %}selected{% endif %}>EP</option>
+            </select>
+        </div>
+        <div class="field">
+            <label for="sort">Sort</label>
+            <select class="input" id="sort" name="sort">
+                <option value="newest" {% if filters.sort == 'newest' %}selected{% endif %}>Newest</option>
+                <option value="price-asc" {% if filters.sort == 'price-asc' %}selected{% endif %}>Price Low to High</option>
+                <option value="price-desc" {% if filters.sort == 'price-desc' %}selected{% endif %}>Price High to Low</option>
+            </select>
+        </div>
+        <button class="btn btn-primary" type="submit">Apply</button>
+    </form>
+</section>
+
+<section class="container section">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Search Results</p>
+            <h2>{{ products.total }} listings matched the current filters.</h2>
+        </div>
+    </div>
+
+    <div class="product-grid">
+        {% for product in products.items %}
+            {% include "partials/product_card.html" %}
+        {% else %}
+            <div class="empty-panel glass-panel">
+                <h3>No listings matched the current search.</h3>
+                <p>Try a broader artist or title keyword, remove a filter, or return to the homepage highlights.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if products.pages > 1 %}
+        <nav class="pagination-shell">
+            {% if products.has_prev %}
+                <a class="ghost-chip" href="{{ url_for('public.catalog', page=products.prev_num, q=filters.q, format=filters.format, sort=filters.sort, category=filters.category) }}">Previous</a>
+            {% endif %}
+            <span class="ghost-chip">Page {{ products.page }} / {{ products.pages }}</span>
+            {% if products.has_next %}
+                <a class="ghost-chip" href="{{ url_for('public.catalog', page=products.next_num, q=filters.q, format=filters.format, sort=filters.sort, category=filters.category) }}">Next</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}User Management - musicOnline{% endblock %}
+{% block content %}
+<section class="container section">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Administrator Accounts</p>
+    <h1>View administrator, registered user, and retailer account records</h1>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        {% for admin in admins %}
+            <article class="dashboard-card glass-panel">
+                <div class="dashboard-card__top">
+                    <div>
+                        <strong>{{ admin.display_name }}</strong>
+                            <p>{{ admin.username }} - {{ admin.email }}</p>
+                    </div>
+                    <span class="status-pill {{ 'approved' if admin.is_active else 'rejected' }}">{{ "active" if admin.is_active else "inactive" }}</span>
+                </div>
+                <div class="dashboard-card__meta">
+                    <span>Administrator</span>
+                    <span>{{ admin.created_at.strftime('%Y-%m-%d') }}</span>
+                </div>
+    <p>Administrator accounts are managed separately from registered user and retailer accounts.</p>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="container section">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Registered Users</p>
+    <h2>Manage registered user and retailer account status</h2>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        {% for user in users %}
+            <article class="dashboard-card glass-panel">
+                <div class="dashboard-card__top">
+                    <div>
+                        <strong>{{ user.display_name }}</strong>
+                            <p>{{ user.username }} - {{ user.email }}</p>
+                    </div>
+                    <span class="status-pill {{ 'approved' if user.is_active else 'rejected' }}">{{ "active" if user.is_active else "inactive" }}</span>
+                </div>
+                <div class="dashboard-card__meta">
+                    <span>{{ user.primary_role_label }}</span>
+                    <span>{{ user.created_at.strftime('%Y-%m-%d') }}</span>
+                </div>
+                <div class="dashboard-card__actions">
+                    <form action="{{ url_for('dashboard.admin_user_toggle_active', user_id=user.id) }}" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="ghost-chip {{ 'danger' if user.is_active else 'ghost-chip--primary' }}" type="submit">{{ "Deactivate" if user.is_active else "Activate" }}</button>
+                    </form>
+                </div>
+            </article>
+        {% else %}
+            <div class="empty-panel glass-panel">
+                <h3>No registered users yet.</h3>
+        <p>New registered user and retailer accounts will appear here after registration.</p>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}musicOnline{% endblock %}
+{% block content %}
+<section class="hero container">
+    <div class="hero-copy">
+        <p class="eyebrow">musicOnline.com</p>
+        <h1>Find vinyl listings by artist, album, single, or EP title.</h1>
+        <p class="hero-copy__text">
+            Browse curated records, review listing details, add vinyl to your bag, and manage listing activity from one focused marketplace.
+        </p>
+        <div class="hero-actions">
+            <a class="btn btn-primary" href="{{ url_for('public.catalog') }}">Search Vinyl</a>
+            <a class="btn btn-secondary" href="{{ url_for('dashboard.product_create') if current_user.is_authenticated and not current_user.is_admin else url_for('auth.register') }}">Add a Listing</a>
+        </div>
+        <div class="hero-metrics">
+            <div class="metric glass-panel">
+                <span>{{ total_products }}</span>
+                <small>approved listings</small>
+            </div>
+            <div class="metric glass-panel">
+                <span>{{ category_count }}</span>
+                <small>music categories</small>
+            </div>
+            <div class="metric glass-panel">
+                <span>{{ seller_count }}</span>
+                <small>registered users</small>
+            </div>
+        </div>
+    </div>
+    <div class="hero-visual">
+        <div class="player-panel glass-panel hero-showcase">
+            <div class="player-panel__top">
+                <div>
+                    <p class="eyebrow">Marketplace Snapshot</p>
+                    <h3>{{ spotlight_product.title if spotlight_product else "Approved Vinyl Listings" }}</h3>
+                    <p>{{ spotlight_product.artist if spotlight_product else "Search, listing tools, and catalog review in one place." }}</p>
+                </div>
+                <span class="ghost-chip">{{ spotlight_product.format_label if spotlight_product else "Curated Vinyl" }}</span>
+            </div>
+            <div class="player-panel__body">
+                <div class="vinyl-stage">
+                    <span class="vinyl-stage__halo"></span>
+                    <span class="vinyl-stage__record"></span>
+                    <span class="vinyl-stage__center"></span>
+                </div>
+                <div class="showcase-copy">
+                    <p>Discover searchable records with clear release details, listing owner information, availability, and order actions.</p>
+                    <div class="showcase-pills">
+                        <span class="ghost-chip">Search by artist or title</span>
+                        <span class="ghost-chip">Bag and direct order flow</span>
+                        <span class="ghost-chip">Register as user or retailer</span>
+                        <span class="ghost-chip">Admin-monitored listings</span>
+                    </div>
+                    {% if spotlight_product %}
+                        <a class="btn btn-secondary" href="{{ url_for('public.product_detail', product_id=spotlight_product.id) }}">Open highlighted listing</a>
+                    {% else %}
+                        <a class="btn btn-secondary" href="{{ url_for('public.catalog') }}">Browse listings</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section container">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Marketplace Services</p>
+            <h2>Everything needed to browse, list, review, and order vinyl records with confidence.</h2>
+        </div>
+    </div>
+    <div class="feature-tiles">
+        {% for item in project_highlights %}
+            <article class="feature-tile glass-panel">
+                <span class="ghost-chip">{{ item.eyebrow }}</span>
+                <h3>{{ item.title }}</h3>
+                <p>{{ item.text }}</p>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="section container">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Featured Promotions</p>
+            <h2>Highlights for collectors, registered users, and record lovers browsing the catalog.</h2>
+        </div>
+    </div>
+    <div class="ad-grid">
+        {% for ad in placeholder_ads %}
+            <article class="ad-card glass-panel" data-tone="{{ ad.tone }}">
+                <div class="ad-card__poster">
+                    <span class="ghost-chip">{{ ad.badge }}</span>
+                    <div class="ad-card__visual" aria-hidden="true">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+                <div class="ad-card__copy">
+                    <p class="eyebrow">{{ ad.eyebrow }}</p>
+                    <h3>{{ ad.title }}</h3>
+                    <p>{{ ad.text }}</p>
+                    <a class="ghost-chip" href="{{ url_for(ad.endpoint) }}">{{ ad.link_label }}</a>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="section container">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Approved Listings</p>
+            <h2>Available vinyl listings with artist, title, format, and listed price.</h2>
+        </div>
+        <a href="{{ url_for('public.catalog') }}">View all listings</a>
+    </div>
+    <div class="product-grid">
+        {% for product in highlighted_products %}
+            {% include "partials/product_card.html" %}
+        {% endfor %}
+    </div>
+</section>
+
+<section class="section container split-section">
+    <div class="story-panel glass-panel">
+        <p class="eyebrow">For Registered Users</p>
+        <h2>Registered users can add, edit, and delete vinyl listings from one simple workspace.</h2>
+        <p>Each listing is tied to a registered user account, then returned to pending review whenever it is updated.</p>
+        <a class="btn btn-secondary" href="{{ url_for('dashboard.products') if current_user.is_authenticated and not current_user.is_admin else url_for('auth.register') }}">Open listing workspace</a>
+    </div>
+    <div class="story-panel glass-panel">
+        <p class="eyebrow">Search And Detail</p>
+        <h2>Search results surface key record data, and each listing opens a page with release date, price, listing owner, bag actions, and order shortcuts.</h2>
+        <p>Each listing page gives buyers the details they need before adding a record to their bag or creating an order.</p>
+        <a class="btn btn-primary" href="{{ url_for('public.catalog') }}">Browse listings</a>
+    </div>
+</section>
+
+<section class="section container">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Latest Listings</p>
+            <h2>Recently approved vinyl entries ready for browsing.</h2>
+        </div>
+    </div>
+    <div class="product-grid">
+        {% for product in latest_products %}
+            {% include "partials/product_card.html" %}
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

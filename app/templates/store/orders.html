@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}My Orders - musicOnline{% endblock %}
+{% block content %}
+<section class="bag-hero container">
+    <div>
+        <p class="eyebrow">Orders</p>
+        <h1>Orders created from direct purchase or bag checkout.</h1>
+        <p>Each order keeps quantity, unit price, status, and total so you can review your activity clearly.</p>
+    </div>
+    <div class="bag-hero__actions">
+        <a class="btn btn-secondary" href="{{ url_for('commerce.bag') }}">Open Bag</a>
+        <a class="btn btn-secondary" href="{{ url_for('public.catalog') }}">Browse Vinyl</a>
+    </div>
+</section>
+
+<section class="container section">
+    <div class="order-grid">
+        {% for order in orders %}
+            <article class="order-card glass-panel">
+                <div class="order-card__header">
+                    <div>
+                        <p class="eyebrow">Order {{ order.order_number }}</p>
+                        <h3>{{ order.total_quantity }} item{{ "" if order.total_quantity == 1 else "s" }} - RMB {{ order.total_amount|money }}</h3>
+                    </div>
+                    <span class="status-pill {{ order.status }}">{{ order.status_label }}</span>
+                </div>
+                <p>Created {{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                <div class="order-card__items">
+                    {% for item in order.items[:3] %}
+                        <div class="order-card__item">
+                            <span>{{ item.product.title }}</span>
+                            <span>{{ item.quantity }} x RMB {{ item.unit_price|money }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+                <a class="btn btn-secondary" href="{{ url_for('commerce.order_detail', order_id=order.id) }}">View Order</a>
+            </article>
+        {% else %}
+            <div class="empty-panel glass-panel">
+                <h3>No orders yet.</h3>
+                <p>Create an order from a vinyl detail page or from your bag.</p>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

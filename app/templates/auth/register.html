@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Register - musicOnline{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+{% block content %}
+<section class="auth-stage container">
+    <div class="auth-window glass-panel">
+        <div class="auth-copy">
+            <p class="eyebrow">New Registration</p>
+            <h1>Create your account.</h1>
+            <p>Join to browse, order, or list vinyl records.</p>
+            <div class="auth-note-list">
+                <p>User accounts can browse and order.</p>
+                <p>Retailers can submit listings for review.</p>
+            </div>
+        </div>
+        <div class="auth-card">
+            <div class="auth-card__header">
+                <p class="eyebrow">Create Account</p>
+                <h2>Join musicOnline</h2>
+                <p>Choose any username. Email must use xxx@musiconline.com.</p>
+            </div>
+            <div class="auth-form-status" data-auth-status hidden></div>
+            <form
+                method="post"
+                class="form-grid"
+                action="{{ url_for('auth.register') }}"
+                data-auth-form
+                data-auth-success="redirect"
+                data-auth-button-busy="Creating..."
+            >
+                {{ form.hidden_tag() }}
+                <div class="field two-col">
+                    <div>
+                        {{ form.username.label }}
+                        {{ form.username(class_="input" ~ (" is-invalid" if form.username.errors else ""), autocomplete="username", placeholder="vinylfan") }}
+                    </div>
+                    <div>
+                        {{ form.display_name.label }}
+                        {{ form.display_name(class_="input" ~ (" is-invalid" if form.display_name.errors else ""), autocomplete="name") }}
+                    </div>
+                </div>
+                <div class="field">
+                    {{ form.email.label }}
+                    {{ form.email(class_="input" ~ (" is-invalid" if form.email.errors else ""), autocomplete="email", placeholder="name@musiconline.com") }}
+                </div>
+                <div class="field two-col">
+                    <div>
+                        {{ form.password.label }}
+                        {{ form.password(class_="input" ~ (" is-invalid" if form.password.errors else ""), autocomplete="new-password") }}
+                    </div>
+                    <div>
+                        {{ form.confirm_password.label }}
+                        {{ form.confirm_password(class_="input" ~ (" is-invalid" if form.confirm_password.errors else ""), autocomplete="new-password") }}
+                    </div>
+                </div>
+                <label class="check-row">{{ form.is_retailer() }}<span>{{ form.is_retailer.label.text }}</span></label>
+                <button class="btn btn-primary btn-block" type="submit" data-auth-submit>{{ form.submit.label.text }}</button>
+                <p class="form-meta">Already registered? <a href="{{ url_for('auth.login') }}">Sign in</a></p>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

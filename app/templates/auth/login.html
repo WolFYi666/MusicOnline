@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Sign In - musicOnline{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+{% block content %}
+<section class="auth-stage container">
+    <div class="auth-window glass-panel">
+        <div class="auth-copy auth-copy--spotlight">
+            <p class="eyebrow">Access</p>
+            <h1>Sign in securely.</h1>
+            <p>Manage your bag, orders, and listings in one place.</p>
+            <div class="auth-hint">
+                <strong>Account access</strong>
+                <p>Use your username or email to continue.</p>
+            </div>
+        </div>
+        <div class="auth-card">
+            <div class="auth-card__header">
+                <p class="eyebrow">Sign In</p>
+                <h2>Welcome back</h2>
+                <p>Continue with one secure sign-in form.</p>
+            </div>
+            <div class="auth-form-status" data-auth-status hidden></div>
+            <form
+                method="post"
+                class="form-grid"
+                action="{{ url_for('auth.login', next=request.args.get('next')) }}"
+                data-auth-form
+                data-auth-success="redirect"
+                data-auth-button-busy="Checking..."
+            >
+                {{ form.hidden_tag() }}
+                <div class="field">
+                    {{ form.username.label }}
+                    {{ form.username(class_="input" ~ (" is-invalid" if form.username.errors else ""), autocomplete="username") }}
+                </div>
+                <div class="field">
+                    {{ form.password.label }}
+                    {{ form.password(class_="input" ~ (" is-invalid" if form.password.errors else ""), autocomplete="current-password") }}
+                    <div class="field-link-row">
+                        <a class="field-link" href="{{ url_for('auth.forgot_password') }}">Forgot password?</a>
+                    </div>
+                </div>
+                <label class="check-row">{{ form.remember() }}<span>{{ form.remember.label.text }}</span></label>
+                <button class="btn btn-primary btn-block" type="submit" data-auth-submit>{{ form.submit.label.text }}</button>
+                <p class="form-meta">No account yet? <a href="{{ url_for('auth.register') }}">Create one</a></p>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

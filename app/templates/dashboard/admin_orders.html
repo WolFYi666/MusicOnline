@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Orders - musicOnline{% endblock %}
+{% block content %}
+<section class="container section">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Orders</p>
+            <h1>Review customer orders created by registered users</h1>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        {% for order in orders %}
+            <article class="dashboard-card glass-panel">
+                <div class="dashboard-card__top">
+                    <div>
+                        <strong>{{ order.order_number }}</strong>
+                        <p>{{ order.buyer.display_name }} - {{ order.total_quantity }} item{{ "" if order.total_quantity == 1 else "s" }}</p>
+                    </div>
+                    <span class="status-pill {{ order.status }}">{{ order.status_label }}</span>
+                </div>
+                <div class="dashboard-card__meta">
+                    <span>RMB {{ order.total_amount|money }}</span>
+                    <span>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                <form action="{{ url_for('commerce.admin_order_status', order_id=order.id) }}" method="post" class="form-grid compact">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="field">
+                        <div>
+                            <label>Status</label>
+                            <select class="input" name="status">
+                                {% for status in status_options %}
+                                    <option value="{{ status }}" {% if order.status == status %}selected{% endif %}>{{ status|title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="dashboard-card__actions">
+                        <button class="ghost-chip ghost-chip--primary" type="submit">Save status</button>
+                        <a class="ghost-chip" href="{{ url_for('commerce.order_detail', order_id=order.id) }}">Open order</a>
+                    </div>
+                </form>
+            </article>
+        {% else %}
+            <div class="empty-panel glass-panel">
+                <h3>No orders yet.</h3>
+                <p>Orders created by direct purchase or bag checkout will appear here.</p>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

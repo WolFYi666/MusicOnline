@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}musicOnline{% endblock %}</title>
+    <meta name="description" content="musicOnline.com is a vinyl marketplace for searching records, managing listings, creating orders, and reviewing listing activity.">
+    <script>document.documentElement.classList.add('js-enhanced');</script>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css', v='20260424-nav-auth-button') }}">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+<div class="page-transition-layer" aria-hidden="true"></div>
+<div class="page-shell">
+    <header class="site-header">
+        <div class="nav-shell glass-panel">
+            <a class="brandmark" href="{{ url_for('public.home') }}">
+                <span class="brandmark__dot"></span>
+                <span>musicOnline</span>
+            </a>
+            <nav class="site-nav" aria-label="Primary">
+                <a class="nav-link" href="{{ url_for('public.home') }}">Home</a>
+                <a class="nav-link" href="{{ url_for('public.catalog') }}">Search Vinyl</a>
+                {% if current_user.is_authenticated %}
+                    {% if current_user.has_permission('admin.access') %}
+                        <a class="nav-link" href="{{ url_for('dashboard.admin_products') }}">Review Listings</a>
+                        <a class="nav-link" href="{{ url_for('commerce.admin_orders') }}">Orders</a>
+                        <a class="nav-link" href="{{ url_for('dashboard.admin_users') }}">Manage Users</a>
+                    {% else %}
+                        <a class="nav-link" href="{{ url_for('commerce.orders') }}">My Orders</a>
+                        <a class="nav-link" href="{{ url_for('dashboard.products') }}">My Listings</a>
+                    {% endif %}
+                {% else %}
+                    <a class="nav-link" href="{{ url_for('auth.register') }}">Register</a>
+                {% endif %}
+            </nav>
+            <div class="nav-actions">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-stack" data-flash-stack aria-live="polite" aria-atomic="true">
+                            {% for category, message in messages %}
+                                {% if category == "success" %}
+                                    {% set flash_title = "Success" %}
+                                {% elif category == "error" %}
+                                    {% set flash_title = "Action needed" %}
+                                {% else %}
+                                    {% set flash_title = "Notice" %}
+                                {% endif %}
+                                <div class="flash flash-{{ category }}" data-flash>
+                                    <span class="flash__icon" aria-hidden="true">
+                                        {% if category == "success" %}
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="m5 12 4.2 4.2L19 6.5"></path>
+                                            </svg>
+                                        {% elif category == "error" %}
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M12 8.2v4.7"></path>
+                                                <path d="M12 16.7h.01"></path>
+                                                <path d="M10.6 3.9 2.8 17.4a1.6 1.6 0 0 0 1.4 2.4h15.6a1.6 1.6 0 0 0 1.4-2.4L13.4 3.9a1.6 1.6 0 0 0-2.8 0Z"></path>
+                                            </svg>
+                                        {% else %}
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="8.5"></circle>
+                                                <path d="M12 10.2v5"></path>
+                                                <path d="M12 7.3h.01"></path>
+                                            </svg>
+                                        {% endif %}
+                                    </span>
+                                    <div class="flash__body">
+                                        <strong class="flash__title">{{ flash_title }}</strong>
+                                        <p class="flash__message">{{ message }}</p>
+                                    </div>
+                                    <button class="flash__close" type="button" data-flash-close aria-label="Close notification">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                {% if current_user.is_authenticated %}
+                    {% if not current_user.is_admin %}
+                        <a class="nav-icon-button" href="{{ url_for('commerce.bag') }}" aria-label="Open bag">
+                            <span class="nav-link__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M6 8h12l-1.3 10.3a2 2 0 0 1-2 1.7H9.3a2 2 0 0 1-2-1.7L6 8Z"></path>
+                                    <path d="M9.5 8V7a2.5 2.5 0 0 1 5 0v1"></path>
+                                </svg>
+                            </span>
+                            {% if bag_item_count %}
+                                <span class="nav-badge">{{ bag_item_count }}</span>
+                            {% endif %}
+                        </a>
+                    {% endif %}
+                    <a class="nav-icon-button" href="{{ url_for('dashboard.home') }}" aria-label="Open {{ current_user.display_name }} dashboard" title="{{ current_user.display_name }}">
+                        <span class="nav-link__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4.5 19.5a7.5 7.5 0 0 1 15 0"></path>
+                                <circle cx="12" cy="8" r="3.5"></circle>
+                            </svg>
+                        </span>
+                    </a>
+                    <form action="{{ url_for('auth.logout') }}" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-primary btn-small" type="submit">Sign Out</button>
+                    </form>
+                {% else %}
+                    <a class="btn btn-primary btn-small" href="{{ url_for('auth.login') }}">Sign In</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer container">
+        <div class="footer-panel glass-panel">
+            <div>
+                <p class="eyebrow">musicOnline.com</p>
+                <h3>A focused vinyl marketplace for search, listing management, browsing, and order review.</h3>
+            </div>
+            <div class="footer-links">
+                <a href="{{ url_for('public.catalog') }}">Search vinyl</a>
+                <a href="{{ url_for('dashboard.home') if current_user.is_authenticated else url_for('auth.login') }}">Open dashboard</a>
+                {% if current_user.is_authenticated and current_user.has_permission('admin.access') %}
+                    <a href="{{ url_for('commerce.admin_orders') }}">Open orders</a>
+                    <a href="{{ url_for('dashboard.admin_products') }}">Review listings</a>
+                {% elif current_user.is_authenticated %}
+                    <a href="{{ url_for('commerce.bag') }}">View bag</a>
+                    <a href="{{ url_for('commerce.orders') }}">My orders</a>
+                {% else %}
+                    <a href="{{ url_for('auth.register') }}">Create account</a>
+                {% endif %}
+            </div>
+        </div>
+        <p class="footer-note">Copyright {{ current_year }} musicOnline. Browse, list, and manage vinyl records in one place.</p>
+    </footer>
+</div>
+<script src="{{ url_for('static', filename='js/app.js', v='20260424-select-auth') }}"></script>
+</body>
+</html>

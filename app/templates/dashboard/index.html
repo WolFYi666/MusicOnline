@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - musicOnline{% endblock %}
+{% block content %}
+<section class="dashboard-hero container">
+    <div>
+        <p class="eyebrow">Workspace</p>
+    <h1>{{ "Administration Dashboard" if current_user.is_admin else "Listing Workspace" }}</h1>
+        <p>
+            {% if current_user.is_admin %}
+                Monitor registered users and review submitted vinyl listings from one moderation workspace.
+            {% else %}
+                Add, edit, and manage your own vinyl listings before they are reviewed by an administrator.
+            {% endif %}
+        </p>
+    </div>
+    <div class="hero-actions">
+        {% if current_user.is_admin %}
+            <a class="btn btn-primary" href="{{ url_for('dashboard.admin_products') }}">Review Listings</a>
+            <a class="btn btn-secondary" href="{{ url_for('commerce.admin_orders') }}">Manage Orders</a>
+            <a class="btn btn-secondary" href="{{ url_for('dashboard.admin_users') }}">Manage Users</a>
+        {% else %}
+            <a class="btn btn-primary" href="{{ url_for('dashboard.product_create') }}">Add Listing</a>
+            <a class="btn btn-secondary" href="{{ url_for('commerce.bag') }}">Open Bag</a>
+            <a class="btn btn-secondary" href="{{ url_for('commerce.orders') }}">My Orders</a>
+            <a class="btn btn-secondary" href="{{ url_for('dashboard.products') }}">My Listings</a>
+        {% endif %}
+    </div>
+</section>
+
+<section class="container stats-grid">
+    {% for label, value in stats.items() %}
+        <article class="metric glass-panel">
+            <small>{{ label|replace('_', ' ')|title }}</small>
+            <span>{{ value }}</span>
+        </article>
+    {% endfor %}
+</section>
+
+<section class="container dual-grid section">
+    <div class="glass-panel list-panel">
+        <div class="section-heading compact">
+            <div>
+                <p class="eyebrow">Recent Listings</p>
+                <h2>{{ "Latest submissions" if current_user.is_admin else "My latest listing activity" }}</h2>
+            </div>
+            <a href="{{ url_for('dashboard.admin_products') if current_user.is_admin else url_for('dashboard.products') }}">Open listings</a>
+        </div>
+        <div class="stack-list">
+            {% for product in recent_products %}
+                <article class="stack-item">
+                    <div>
+                        <strong>{{ product.title }}</strong>
+                        <p>{{ product.artist }} - {{ product.approval_status|title }}</p>
+                    </div>
+                    <span>RMB {{ product.price|money }}</span>
+                </article>
+            {% else %}
+                <p>No listings available yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="glass-panel list-panel">
+        {% if current_user.is_admin %}
+            <div class="section-heading compact">
+                <div>
+                    <p class="eyebrow">Recent Registered Users</p>
+          <h2>Latest registered user and retailer accounts</h2>
+                </div>
+                <a href="{{ url_for('dashboard.admin_users') }}">Open users</a>
+            </div>
+            <div class="stack-list">
+                {% for user in recent_users %}
+                    <article class="stack-item">
+                        <div>
+                            <strong>{{ user.display_name }}</strong>
+                <p>{{ user.username }} - {{ user.primary_role_label }}</p>
+                        </div>
+                        <span>{{ user.created_at.strftime('%Y-%m-%d') }}</span>
+                    </article>
+                {% else %}
+                    <p>No registered users yet.</p>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="section-heading compact">
+                <div>
+                    <p class="eyebrow">Approved Catalog</p>
+                    <h2>Latest public vinyl records</h2>
+                </div>
+                <a href="{{ url_for('public.catalog') }}">Open catalog</a>
+            </div>
+            <div class="stack-list">
+                {% for product in recent_public_products %}
+                    <article class="stack-item">
+                        <div>
+                            <strong>{{ product.title }}</strong>
+                            <p>{{ product.artist }} - {{ product.format_label }}</p>
+                        </div>
+                        <span>RMB {{ product.price|money }}</span>
+                    </article>
+                {% else %}
+                    <p>No approved listings yet.</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+{% if current_user.is_admin %}
+    <section class="container quick-links section">
+        <a class="quick-link glass-panel" href="{{ url_for('commerce.admin_orders') }}">
+            <p class="eyebrow">Orders</p>
+            <h3>Monitor customer orders</h3>
+        </a>
+        <a class="quick-link glass-panel" href="{{ url_for('dashboard.admin_products') }}">
+            <p class="eyebrow">Moderation</p>
+            <h3>Review submitted listings</h3>
+        </a>
+        <a class="quick-link glass-panel" href="{{ url_for('dashboard.admin_users') }}">
+            <p class="eyebrow">Users</p>
+          <h3>Manage registered user and retailer accounts</h3>
+        </a>
+    </section>
+{% else %}
+    <section class="container quick-links section">
+        <a class="quick-link glass-panel" href="{{ url_for('commerce.bag') }}">
+            <p class="eyebrow">Bag</p>
+            <h3>Review selected vinyl before checkout</h3>
+        </a>
+        <a class="quick-link glass-panel" href="{{ url_for('commerce.orders') }}">
+            <p class="eyebrow">Orders</p>
+            <h3>Track your order history</h3>
+        </a>
+    </section>
+{% endif %}
+{% endblock %}

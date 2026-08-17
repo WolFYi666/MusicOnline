@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} - musicOnline{% endblock %}
+{% block content %}
+<section class="container section">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Listing Editor</p>
+            <h1>{{ page_title }}</h1>
+        </div>
+        <a href="{{ url_for('dashboard.products') }}">Back to listings</a>
+    </div>
+
+    <form class="editor-shell glass-panel form-grid" method="post">
+        {{ form.hidden_tag() }}
+        <div class="field two-col">
+            <div>
+                {{ form.title.label }}
+                {{ form.title(class_="input") }}
+                {% for error in form.title.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+            </div>
+            <div>
+                {{ form.artist.label }}
+                {{ form.artist(class_="input") }}
+                {% for error in form.artist.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+            </div>
+        </div>
+
+        <div class="field two-col">
+            <div>
+                {{ form.format_type.label }}
+                {{ form.format_type(class_="input") }}
+            </div>
+            <div>
+                {{ form.category_id.label }}
+                {{ form.category_id(class_="input") }}
+            </div>
+        </div>
+
+        <div class="field three-col">
+            <div>
+                {{ form.release_date.label }}
+                {{ form.release_date(class_="input") }}
+            </div>
+            <div>
+                {{ form.price.label }}
+                {{ form.price(class_="input") }}
+            </div>
+            <div>
+                {{ form.stock.label }}
+                {{ form.stock(class_="input") }}
+            </div>
+        </div>
+
+        <div class="field">
+            {{ form.image_url.label }}
+            {{ form.image_url(class_="input") }}
+            {% for error in form.image_url.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+        </div>
+
+        <div class="field">
+            {{ form.description.label }}
+            {{ form.description(class_="input input-textarea", rows="6") }}
+            {% for error in form.description.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+        </div>
+
+        <button class="btn btn-primary btn-liquid" type="submit">{{ form.submit.label.text }}</button>
+    </form>
+</section>
+{% endblock %}

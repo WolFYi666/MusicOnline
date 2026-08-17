@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Bag - musicOnline{% endblock %}
+{% block content %}
+<section class="bag-hero container">
+    <div>
+        <p class="eyebrow">Bag</p>
+        <h1>Review your selected vinyl before creating an order.</h1>
+        <p>Check quantities, availability, and totals before submitting your order.</p>
+    </div>
+    <div class="bag-hero__actions">
+        <a class="btn btn-secondary" href="{{ url_for('public.catalog') }}">Continue Shopping</a>
+        <a class="btn btn-secondary" href="{{ url_for('commerce.orders') }}">My Orders</a>
+    </div>
+</section>
+
+<section class="container section bag-layout">
+    <div class="bag-list">
+        {% for item in items %}
+            <article class="bag-item glass-panel">
+                <a class="cover-art cover-art--mini" data-tone="{{ item.product.id % 6 }}" href="{{ url_for('public.product_detail', product_id=item.product.id) }}">
+                    {% if item.product.image_url %}
+                        <img src="{{ item.product.image_url }}" alt="{{ item.product.title }}">
+                    {% else %}
+                        <div class="cover-art__placeholder">
+                            <span class="cover-art__disc cover-art__disc--mini"></span>
+                        </div>
+                    {% endif %}
+                </a>
+                <div class="bag-item__copy">
+                    <p class="eyebrow">{{ item.product.category.name }}</p>
+                    <h3><a href="{{ url_for('public.product_detail', product_id=item.product.id) }}">{{ item.product.title }}</a></h3>
+                    <p>{{ item.product.artist }} - {{ item.product.format_label }} - Listed by {{ item.product.seller.display_name }}</p>
+                    <span class="ghost-chip">{{ item.product.stock }} available</span>
+                </div>
+                <div class="bag-item__controls">
+                    <form class="bag-quantity-form" action="{{ url_for('commerce.bag_item_update', item_id=item.id) }}" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <label for="qty-{{ item.id }}">Quantity</label>
+                        <div class="bag-quantity-form__row">
+                            <input class="input quantity-input" id="qty-{{ item.id }}" name="quantity" type="number" min="1" max="{{ item.product.stock }}" value="{{ item.quantity }}">
+                            <button class="ghost-chip" type="submit">Update</button>
+                        </div>
+                    </form>
+                    <div class="bag-item__price">
+                        <strong>RMB {{ item.line_total|money }}</strong>
+                        <small>{{ item.quantity }} x RMB {{ item.product.price|money }}</small>
+                    </div>
+                    <form action="{{ url_for('commerce.bag_item_remove', item_id=item.id) }}" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="ghost-chip danger" type="submit">Remove</button>
+                    </form>
+                </div>
+            </article>
+        {% else %}
+            <div class="empty-panel glass-panel">
+                <h3>Your bag is empty.</h3>
+                <p>Add a vinyl listing from the catalog to create an order.</p>
+                <a class="btn btn-primary" href="{{ url_for('public.catalog') }}">Browse Vinyl</a>
+            </div>
+        {% endfor %}
+    </div>
+
+    <aside class="bag-summary glass-panel">
+        <p class="eyebrow">Summary</p>
+        <h2>{{ item_count }} item{{ "" if item_count == 1 else "s" }}</h2>
+        <div class="summary-rows">
+            <div class="summary-row">
+                <span>Items</span>
+                <strong>{{ item_count }}</strong>
+            </div>
+            <div class="summary-row">
+                <span>Order total</span>
+                <strong>RMB {{ subtotal|money }}</strong>
+            </div>
+        </div>
+        <p class="bag-summary__note">Submitting an order records your request and updates available stock immediately.</p>
+        <form action="{{ url_for('commerce.checkout') }}" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-primary btn-block" type="submit" {% if not items %}disabled{% endif %}>Create Order</button>
+        </form>
+    </aside>
+</section>
+{% endblock %}
